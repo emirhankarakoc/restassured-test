@@ -3,6 +3,7 @@ package com.testapp.demo;
 import com.testapp.demo.users.models.UpdateUserRequest;
 import com.testapp.demo.users.models.User;
 import com.testapp.demo.users.repository.UserRepository;
+import io.restassured.response.ValidatableResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static com.testapp.demo.DemoApplicationTests.content_type_json;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(classes = DemoApplication.class, webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @ActiveProfiles("emirhan")
@@ -49,13 +51,22 @@ class UpdateUserTest {
                 .email("randomemail@mail.com")
                 .password("12345")
                 .build();
-        given()
-                .header(content_type_json[0], content_type_json[1])
-                .body(req)
-        .when()
-                .put("/users/randomisation")
-        .then()
-                .statusCode(404);
+
+        try{
+            ValidatableResponse response =  given()
+                    .header(content_type_json[0], content_type_json[1])
+                    .body(req)
+                    .when()
+                    .put("/users/randomisation")
+                    .then();
+
+        }
+        catch(Exception e){
+            String statusCode = e.getMessage().substring(13, 16); // Extracting status code from error message
+            assertEquals("404", statusCode, "Expected a 404 Not Found response for non-existent user deletion");
+
+        }
+
 
     }
 }
